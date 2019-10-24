@@ -1,0 +1,25 @@
+{
+  "name": "riot-retro-nag-bot",
+  "version": "0.0.1",
+  "description": "A Matrix bot that complains when people don't do their retro actions",
+  "main": "lib/index.js",
+  "repository": "git@github.com:vector-im/riot-retro-nag-bot.git",
+  "author": "New Vector",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "tsc",
+    "lint": "tslint --project ./tsconfig.json --type-check -t stylish",
+    "start:dev": "yarn build && node lib/index.js"
+  },
+  "dependencies": {
+    "config": "^3.2.3",
+    "github-api": "^3.3.0",
+    "js-yaml": "^3.13.1",
+    "matrix-bot-sdk": "^0.4.0-beta.8"
+  },
+  "devDependencies": {
+    "@types/node": "10",
+    "tslint": "^5.20.0",
+    "typescript": "^3.6.4"
+  }
+}
