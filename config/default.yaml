@@ -11,5 +11,18 @@ dataPath: "/data/storage"
 noticeRoom: "#riot-dev:matrix.org"
 
 # Github API token from https://github.com/settings/tokens
+# The token should have `read:org` enabled.
 githubToken: ""
 
+# Where the retro board is located (organization only)
+projectOwner: "vector-im"
+
+# The ID of the project. Can only be an organization project.
+projectId: 1234
+
+# The column name to search for in the project
+columnName: "Actions"
+
+# Map of human initials to user IDs
+initials:
+  TR: "@travis:t2l.io"

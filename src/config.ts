@@ -22,6 +22,10 @@ interface IConfig {
     dataPath: string;
     githubToken: string;
     noticeRoom: string;
+    projectOwner: string;
+    projectId: string;
+    columnName: string;
+    initials: { [i: string]: string };
 }
 
 export default <IConfig>config;

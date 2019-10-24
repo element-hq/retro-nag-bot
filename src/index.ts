@@ -14,11 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { LogService, MatrixClient, RichConsoleLogger, SimpleFsStorageProvider } from "matrix-bot-sdk";
+import { LogService, MatrixClient, MentionPill, RichConsoleLogger, SimpleFsStorageProvider } from "matrix-bot-sdk";
 import * as path from "path";
 import config from "./config";
+import * as GitHub from "github-api";
 
 LogService.setLogger(new RichConsoleLogger());
+
+const github = new GitHub({token: config.githubToken});
+const ghOrg = github.getOrganization(config.projectOwner);
 
 const storage = new SimpleFsStorageProvider(path.join(config.dataPath, "bot.json"));
 const client = new MatrixClient(config.homeserverUrl, config.accessToken, storage);
@@ -27,8 +31,21 @@ let noticeRoomId = null;
 let userId = null;
 let displayName = null;
 let localpart = null;
+let retroProject;
 
 (async function () {
+    const {data: projects} = await ghOrg.listProjects();
+    for (const project of projects) {
+        console.log(project.html_url);
+        if (project.html_url.endsWith("/" + config.projectId)) {
+            retroProject = github.getProject(project.id);
+            break;
+        }
+    }
+    if (!retroProject) {
+        throw new Error("Missing retro project");
+    }
+
     noticeRoomId = await client.resolveRoom(config.noticeRoom);
     const joinedRooms = await client.getJoinedRooms();
     if (!joinedRooms.includes(noticeRoomId)) {
@@ -68,8 +85,17 @@ async function handleCommand(roomId: string, event: any) {
     const args = event['content']['body'].split(' ');
 
     if (args.length > 0) {
-        if (args[1] === 'status') {
-            // TODO
+        if (args[1] === 'actions') {
+            const actions = await convertActionsToMessages(await getActionTexts());
+            if (actions.length > 0) {
+                for (const action of actions) {
+                    action['msgtype'] = 'm.notice'; // to prevent spam from commands
+                    await client.sendMessage(roomId, action);
+                }
+            } else {
+                await client.sendNotice(roomId, "No actions 🎉");
+            }
+            return;
         }
     }
 
@@ -77,4 +103,49 @@ async function handleCommand(roomId: string, event: any) {
     const help = "Help:\n" +
         "!retro actions - Print current retro actions\n";
     await client.sendNotice(roomId, help);
+}
+
+async function getActionTexts(): Promise<string[]> {
+    const {data: columns} = await retroProject.listProjectColumns();
+    const column = columns.find(c => c.name === config.columnName);
+    const {data: cards} = await retroProject.listColumnCards(column.id);
+    return cards.map(c => c.note);
+}
+
+async function convertActionsToMessages(actions: string[]): Promise<any[]> {
+    const messages = [];
+    for (const action of actions) {
+        const parts = action.replace(/:/g, '').split(' ');
+        const pills = [];
+        let partsTaken = 0;
+        for (const part of parts) {
+            // TODO: Enable this feature?
+            // if (part.toUpperCase() === 'ALL' || part.toUpperCase() === 'ALL.') {
+            //     for (const userId of Object.values(config.initials)) {
+            //         pills.push(await MentionPill.forUser(userId, noticeRoomId, client));
+            //     }
+            //     partsTaken++;
+            //     continue;
+            // }
+            const userId = config.initials[part.toUpperCase()];
+            if (!userId) break;
+            pills.push(await MentionPill.forUser(userId, noticeRoomId, client));
+            partsTaken++;
+        }
+
+        const rebuiltMessage = action.split(' ').slice(partsTaken).join(' ');
+
+        if (pills.length <= 0) pills.push({text: "⚠ UNASSIGNED ⚠", html: "⚠ UNASSIGNED ⚠"});
+
+        const actionHtml = `${pills.map(p => p.html).join(' ')} ${rebuiltMessage}`;
+        const actionText = `${pills.map(p => p.text).join(' ')} ${rebuiltMessage}`;
+
+        messages.push({
+            body: actionText,
+            msgtype: "m.text",
+            format: "org.matrix.custom.html",
+            formatted_body: actionHtml,
+        });
+    }
+    return messages;
 }
