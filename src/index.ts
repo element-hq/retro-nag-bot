@@ -18,6 +18,12 @@ import { LogService, MatrixClient, MentionPill, RichConsoleLogger, SimpleFsStora
 import * as path from "path";
 import config from "./config";
 import * as GitHub from "github-api";
+import "moment-recur";
+import moment = require("moment");
+
+// @ts-ignore
+const INTERVAL = moment("October 23, 2019").recur().every(2).weeks();
+const SPAM_HOUR = 10;
 
 LogService.setLogger(new RichConsoleLogger());
 
@@ -36,7 +42,6 @@ let retroProject;
 (async function () {
     const {data: projects} = await ghOrg.listProjects();
     for (const project of projects) {
-        console.log(project.html_url);
         if (project.html_url.endsWith("/" + config.projectId)) {
             retroProject = github.getProject(project.id);
             break;
@@ -52,6 +57,9 @@ let retroProject;
         noticeRoomId = await client.joinRoom(config.noticeRoom);
     }
 
+    setInterval(onTick, 30 * 60 * 1000); // 30 min
+    onTick(); // call immediately
+
     client.on("room.message", onMessage);
 
     userId = await client.getUserId();
@@ -62,6 +70,16 @@ let retroProject;
 
     client.start().then(() => LogService.info("index", "Bot started"));
 })();
+
+async function onTick() {
+    const now = moment();
+    if (now.hour() === SPAM_HOUR && INTERVAL.matches(now)) {
+        const actions = await convertActionsToMessages(await getActionTexts());
+        for (const action of actions) {
+            await client.sendMessage(noticeRoomId, action);
+        }
+    }
+}
 
 async function onMessage(roomId: string, event: any) {
     if (roomId !== noticeRoomId) return;
