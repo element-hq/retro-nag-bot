@@ -24,6 +24,7 @@ import moment = require("moment");
 // @ts-ignore
 const INTERVAL = moment("October 23, 2019").recur().every(2).weeks();
 const SPAM_HOUR = 10;
+const LAST_SPAM_EVENT_TYPE = "im.vector.last_spam";
 
 LogService.setLogger(new RichConsoleLogger());
 
@@ -74,10 +75,23 @@ let retroProject;
 async function onTick() {
     const now = moment();
     if (now.hour() === SPAM_HOUR && INTERVAL.matches(now)) {
+        let doSpam = true;
+        try {
+            const event = await client.getAccountData(LAST_SPAM_EVENT_TYPE);
+            const last = moment(event['last_timestamp']);
+            if (moment().diff(last, 'days') < 5) {
+                doSpam = false;
+            }
+        } catch (e) {
+            console.error(e);
+            // Assume we want to spam
+        }
+        if (!doSpam) return;
         const actions = await convertActionsToMessages(await getActionTexts());
         for (const action of actions) {
             await client.sendMessage(noticeRoomId, action);
         }
+        await client.setAccountData(LAST_SPAM_EVENT_TYPE, {last_timestamp: moment().format()})
     }
 }
 
