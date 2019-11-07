@@ -172,9 +172,11 @@ async function convertActionsToMessages(actions: string[]): Promise<any[]> {
         const actionHtml = `${pills.map(p => p.html).join(' ')} ${rebuiltMessage}`;
         const actionText = `${pills.map(p => p.text).join(' ')} ${rebuiltMessage}`;
 
+        const msgtype = rebuiltMessage.includes('✔') ? 'm.notice' : 'm.text';
+
         messages.push({
             body: actionText,
-            msgtype: "m.text",
+            msgtype: msgtype,
             format: "org.matrix.custom.html",
             formatted_body: actionHtml,
         });
