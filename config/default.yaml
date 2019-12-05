@@ -23,6 +23,12 @@ projectId: 1234
 # The column name to search for in the project
 columnName: "Actions"
 
+# The date to start recurring from
+startDate: "October 22, 2019"
+
+# The number of weeks to recur beyond the date given
+recurWeeks: 2
+
 # Map of human initials to user IDs
 initials:
   TR: "@travis:t2l.io"

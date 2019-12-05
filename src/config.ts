@@ -26,6 +26,8 @@ interface IConfig {
     projectId: string;
     columnName: string;
     initials: { [i: string]: string };
+    startDate: string;
+    recurWeeks: number; // int
 }
 
 export default <IConfig>config;

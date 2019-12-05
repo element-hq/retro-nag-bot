@@ -22,7 +22,7 @@ import "moment-recur";
 import moment = require("moment");
 
 // @ts-ignore
-const INTERVAL = moment("October 22, 2019").recur().every(2).weeks();
+const INTERVAL = moment(config.startDate).recur().every(config.recurWeeks).weeks();
 const SPAM_HOUR = 10;
 const LAST_SPAM_EVENT_TYPE = "im.vector.last_spam";
 
