@@ -147,7 +147,7 @@ async function getActionTexts(): Promise<string[]> {
 async function convertActionsToMessages(actions: string[]): Promise<any[]> {
     const messages = [];
     for (const action of actions) {
-        const parts = action.replace(/:/g, '').split(' ');
+        const parts = action.replace(/[:.-]/g, '').split(' ');
         const pills = [];
         let partsTaken = 0;
         for (const part of parts) {
