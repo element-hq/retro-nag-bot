@@ -172,7 +172,8 @@ async function convertActionsToMessages(actions: string[]): Promise<any[]> {
         const actionHtml = `${pills.map(p => p.html).join(' ')} ${rebuiltMessage}`;
         const actionText = `${pills.map(p => p.text).join(' ')} ${rebuiltMessage}`;
 
-        const msgtype = rebuiltMessage.includes('✔') ? 'm.notice' : 'm.text';
+        const hasCheckmark = rebuiltMessage.includes('✅') || rebuiltMessage.includes('✔') || rebuiltMessage.includes('☑');
+        const msgtype = hasCheckmark ? 'm.notice' : 'm.text';
 
         messages.push({
             body: actionText,
