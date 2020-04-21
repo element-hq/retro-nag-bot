@@ -146,7 +146,13 @@ async function getActionTexts(): Promise<string[]> {
 
 async function convertActionsToMessages(actions: string[]): Promise<any[]> {
     const messages = [];
-    for (const action of actions) {
+    for (const rawAction of actions) {
+        let action = rawAction;
+        const hasCheckmark = action.includes('✅') || action.includes('✔') || action.includes('☑');
+        if (hasCheckmark) {
+            // Remove the checkmarks now so we don't have to deal with it later
+            action = action.replace(/[☑✅✔]/g, '').trim();
+        }
         const parts = action.replace(/[:.-]/g, '').split(' ');
         const pills = [];
         let partsTaken = 0;
@@ -159,20 +165,33 @@ async function convertActionsToMessages(actions: string[]): Promise<any[]> {
             //     partsTaken++;
             //     continue;
             // }
-            const userId = config.initials[part.toUpperCase()];
-            if (!userId) break;
-            pills.push(await MentionPill.forUser(userId, noticeRoomId, client));
-            partsTaken++;
+            if (part.includes('/')) {
+                // Probably one or more initials - try splitting those apart and use them instead
+                const splitInitials = part.toUpperCase().split('/');
+                for (const initial of splitInitials) {
+                    const userId = config.initials[initial];
+                    if (!userId) {
+                        pills.push({text: initial, html: initial});
+                    } else {
+                        pills.push(await MentionPill.forUser(userId, noticeRoomId, client));
+                    }
+                }
+                partsTaken++;
+            } else {
+                const userId = config.initials[part.toUpperCase()];
+                if (!userId) break;
+                pills.push(await MentionPill.forUser(userId, noticeRoomId, client));
+                partsTaken++;
+            }
         }
 
         const rebuiltMessage = action.split(' ').slice(partsTaken).join(' ');
 
-        if (pills.length <= 0) pills.push({text: "⚠ UNASSIGNED ⚠", html: "⚠ UNASSIGNED ⚠"});
+        if (pills.length <= 0) pills.push({text: "⚠", html: "⚠"});
 
-        const actionHtml = `${pills.map(p => p.html).join(' ')} ${rebuiltMessage}`;
+        const actionHtml = `${pills.map(p => p.text).join(' ')} ${rebuiltMessage}`;
         const actionText = `${pills.map(p => p.text).join(' ')} ${rebuiltMessage}`;
 
-        const hasCheckmark = rebuiltMessage.includes('✅') || rebuiltMessage.includes('✔') || rebuiltMessage.includes('☑');
         const msgtype = hasCheckmark ? 'm.notice' : 'm.text';
 
         messages.push({
