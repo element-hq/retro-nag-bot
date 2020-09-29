@@ -23,7 +23,6 @@ import moment = require("moment");
 
 // @ts-ignore
 const INTERVAL = moment(config.startDate).recur().every(config.recurWeeks).weeks();
-const SPAM_HOUR = 10;
 const LAST_SPAM_EVENT_TYPE = "im.vector.last_spam";
 
 LogService.setLogger(new RichConsoleLogger());
@@ -74,7 +73,8 @@ let retroProject;
 
 async function onTick() {
     const now = moment();
-    if (now.hour() === SPAM_HOUR && INTERVAL.matches(now)) {
+    const hour = config.hour || 10;
+    if (now.hour() === hour && INTERVAL.matches(now)) {
         let doSpam = true;
         try {
             const event = await client.getAccountData(LAST_SPAM_EVENT_TYPE);

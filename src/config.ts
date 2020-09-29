@@ -29,6 +29,7 @@ interface IConfig {
     startDate: string;
     recurWeeks: number; // int
     ignorePrefixes: string[];
+    hour: number; // int
 }
 
 export default <IConfig>config;

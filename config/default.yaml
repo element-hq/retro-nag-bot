@@ -29,6 +29,9 @@ startDate: "October 22, 2019"
 # The number of weeks to recur beyond the date given
 recurWeeks: 2
 
+# The hour to send the action in
+hour: 10
+
 # The prefixes to ignore
 ignorePrefixes:
  - '#'
