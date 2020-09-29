@@ -29,6 +29,10 @@ startDate: "October 22, 2019"
 # The number of weeks to recur beyond the date given
 recurWeeks: 2
 
+# The prefixes to ignore
+ignorePrefixes:
+ - '#'
+
 # Map of human initials to user IDs
 initials:
   TR: "@travis:t2l.io"

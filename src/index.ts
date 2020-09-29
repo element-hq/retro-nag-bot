@@ -148,6 +148,14 @@ async function convertActionsToMessages(actions: string[]): Promise<any[]> {
     const messages = [];
     for (const rawAction of actions) {
         let action = rawAction;
+        let ignore = false;
+        for (const prefix of (config.ignorePrefixes || [])) {
+            if (action.startsWith(prefix)) {
+                ignore = true;
+                break;
+            }
+        }
+        if (ignore) continue;
         const hasCheckmark = action.includes('✅') || action.includes('✔') || action.includes('☑');
         if (hasCheckmark) {
             // Remove the checkmarks now so we don't have to deal with it later

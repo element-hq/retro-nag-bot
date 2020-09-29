@@ -28,6 +28,7 @@ interface IConfig {
     initials: { [i: string]: string };
     startDate: string;
     recurWeeks: number; // int
+    ignorePrefixes: string[];
 }
 
 export default <IConfig>config;
