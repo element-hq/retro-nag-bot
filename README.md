@@ -1,4 +1,4 @@
-# riot-retro-nag-bot
+# retro-nag-bot
 A Matrix bot that complains when people don't do their retro actions
 
 ## Docker (preferred)
@@ -6,8 +6,8 @@ A Matrix bot that complains when people don't do their retro actions
 Build with `docker build -t retro-nag-bot .`.
 
 ```bash
-git clone https://github.com/vector-im/riot-retro-nag-bot.git
-cd riot-retro-nag-bot
+git clone https://github.com/vector-im/retro-nag-bot.git
+cd retro-nag-bot
 
 # Build it
 docker build -t retro-nag-bot .
@@ -26,7 +26,7 @@ docker run --rm -it -v /etc/retro-nag-bot:/data retro-nag-bot:latest
 This bot requires `yarn` and Node 10.
 
 ```bash
-git clone https://github.com/vector-im/riot-retro-nag-bot.git
+git clone https://github.com/vector-im/retro-nag-bot.git
 cd mjolnir
 
 yarn install
@@ -42,4 +42,3 @@ node lib/index.js
 ## Development
 
 TODO. It's a TypeScript project with a linter.
-
