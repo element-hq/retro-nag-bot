@@ -18,8 +18,8 @@ import { LogService, MatrixClient, MentionPill, RichConsoleLogger, SimpleFsStora
 import * as path from "path";
 import config from "./config";
 import * as GitHub from "github-api";
-import "moment-recur";
-import moment = require("moment");
+require("moment");
+const moment = require("moment-recur");
 
 // @ts-ignore
 const INTERVAL = moment(config.startDate).recur().every(config.recurWeeks).weeks();
